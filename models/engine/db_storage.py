@@ -7,9 +7,9 @@ from models.city import City
 from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
-from sqlalchemy import (create_engine)
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
-from os import environ
+import os
 
 
 user = os.getenv('HBNB_MYSQL_USER')
@@ -37,13 +37,13 @@ class DBStorage:
         """Method returns a dictionary of objects"""
         my_dict = {}
         if cls in self.__classes:
-            result = DBStorage.__session.query(cls)
+            result = self.__session.query(cls)
             for row in result:
                 key = "{}.{}".format(row.__class__.__name__, row.id)
                 my_dict[key] = row
         elif cls is None:
             for cl in self.__classes:
-                result = DBStorage.__session.query(cl)
+                result = self.__session.query(cl)
                 for row in result:
                     key = "{}.{}".format(row.__class__.__name__, row.id)
                     my_dict[key] = row
@@ -51,15 +51,16 @@ class DBStorage:
 
     def new(self, obj):
         """Method that adds a new object to the current database"""
-        DBStorage.__session.add(obj)
+        self.__session.add(obj)
 
     def save(self):
         """Method commits all changes to the current database"""
-        DBStorage.__session.commit()
+        self.__session.commit()
 
     def delete(self, obj=None):
-        """Method that deletes a new object to the current database"""
-        DBStorage.__session.delete(obj)
+        """Method that deletes a new object from  the current database"""
+        if obj:
+            self.__session.delete(obj)
 
     def reload(self):
         """Method which creates the current database session"""
@@ -67,8 +68,8 @@ class DBStorage:
         session_factory = sessionmaker(bind=self.__engine,
                                        expire_on_commit=False)
         Session = scoped_session(session_factory)
-        DBStorage.__session = Session()
+        self.__session = Session()
 
     def close(self):
         """method that calls remove"""
-        DBStorage.__session.close()
+        self.__session.close()

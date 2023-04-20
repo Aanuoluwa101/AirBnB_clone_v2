@@ -5,23 +5,23 @@ from models.base_model import BaseModel, Base
 from sqlalchemy import Column, String, Integer, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from models.city import City
-import os
+from os import environ 
 
 
 class State(BaseModel, Base):
     """ State class """
     __tablename__ = "states"
     name = Column(String(128), nullable=False)
-    cities = relationship("City", backref="state",
-                          cascade="all, delete-orphan")
 
-    @property
-    def cities(self):
-        """All cities that return the list of City"""
-        from models import storage
-        my_list = []
-        extracted_cities = storage.all(City).values()
-        for city in models.storage.all(City).values():
-            if city.state_id: == self.id
-                my_list.append(city)
-        return my_list
+    if environ['HBNB_TYPE_STORAGE'] == 'db':
+        cities = relationship("City", backref="state",
+                              cascade="all, delete")
+    else:
+        @property
+        def cities(self):
+            """returns the list of City instances 
+               with state_id equals to the current State.id"""
+            from models import storage
+            extracted_cities = storage.all(City).values()
+            my_list = [city for city in extracted_cities if city.state_id == self.id]
+            return my_list

@@ -10,7 +10,7 @@ Base = declarative_base()
 class BaseModel:
     """A base class for all hbnb models"""
 
-id = Column(String(60), unique=True, nullable=False,  primary_key=True)
+    id = Column(String(60), unique=True, nullable=False,  primary_key=True)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow())
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow())
 
@@ -33,6 +33,8 @@ id = Column(String(60), unique=True, nullable=False,  primary_key=True)
                                                          )
             else:
                 self.created_at = datetime.now()
+            if '__class__' in kwargs:
+                del kwargs['__class__']
             if 'id' not in kwargs:
                 self.id = str(uuid.uuid4())
             self.__dict__.update(kwargs)

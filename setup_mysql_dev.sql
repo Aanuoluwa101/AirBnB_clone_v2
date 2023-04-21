@@ -1,7 +1,7 @@
 -- Script that prepares a MySQL server for the database hbnb_test_db
-CREATE DATABASE IF NOT EXISTS hbnb_test_db;
-CREATE USER IF NOT EXISTS 'hbnb_test'@'localhost'
-SET PASSWORD FOR 'hbnb_test'@'localhost' = 'hbnb_test_pwd';
-GRANT ALL PRIVILEGES ON hbnb_test_db . * TO 'hbnb_test'@'localhost';
-GRANT USAGE ON *.* TO 'hbnb_test'@'localhost';
-GRANT SELECT ON `performance_schema`. * TO 'hbnb_test'@'localhost';
+CREATE DATABASE IF NOT EXISTS hbnb_dev_db;
+CREATE USER IF NOT EXISTS 'hbnb_dev'@'localhost'
+SET PASSWORD FOR 'hbnb_dev'@'localhost' = 'hbnb_dev_pwd';
+GRANT ALL PRIVILEGES ON hbnb_dev_db . * TO 'hbnb_dev'@'localhost';
+GRANT USAGE ON *.* TO 'hbnb_dev'@'localhost';
+GRANT SELECT ON `performance_schema`.* TO 'hbnb_dev'@'localhost';

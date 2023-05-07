@@ -1,16 +1,14 @@
 #!/usr/bin/python3
 """A module that compresses the web static folder
    and deploys it to two web servers"""
-from fabric.api import local
+from fabric.api import *
 import datetime
 import os
 
 
-env = {
-    'key_filename': '~/.ssh/id_rsa',
-    'user': 'ubuntu',
-    'host': ['54.84.251.92', '54.90.50.38']
-}
+env.user = 'ubuntu'
+env.hosts = ['54.90.50.38', '54.84.251.92']
+env.key_filename = '~/.ssh/id_rsa'
 
 
 def do_pack():
@@ -34,21 +32,40 @@ def do_deploy(archive_path):
     Return: True if all operations have been done correctly,
             otherwise returns False
     """
-    if not os.path.isfile(archive_path):
+    if not os.path.exists(archive_path):
         return False
 
-    result1 = put(archive_path, '/tmp/')
-    filename = archive_path.split('/')[-1]
-    compressed = '/tmp/' + filename
-    uncompressed = "/data/web_static/releases/" + filename.split('.')[0]
+    try:
+        put(archive_path, '/tmp/')
 
-    result2 = run("sudo mkdir -p {}".format(uncompressed))
-    result3 = run("sudo tar -xzf {} -C {}".format(compressed, uncompressed))
-    result4 = run("sudo rm {}".format(compressed))
-    link_path = '/data/web_static/current'
-    result5 = run("sudo ln -sf {} {}".format(uncompressed, link_path))
+        filename = archive_path.split('/')[-1]
+        compressed = '/tmp/' + filename
+        uncompressed = "/data/web_static/releases/" + filename.split('.')[0]
 
-    if all([result1.succeeded, result2.succeeded, result3.succeeded,
-           result4.succeeded, result5.succeeded]):
+        # make dir where uncompressed files are going to
+        # ie /data/web_static/releases/web_static_223233232/
+        run("sudo mkdir -p {}".format(uncompressed))
+
+        # uncompress file in created folder.
+        # It will now be /data/web_static/releases/
+        # web_static_232343423/web_static
+        run("sudo tar -xzf {} -C {}".format(compressed, uncompressed))
+
+        # move content to the parent directory
+        run("sudo mv {}/web_static/* {}".format(uncompressed, uncompressed))
+
+        # delete the empty web_static dir
+        run("sudo rm -rf {}/web_static/".format(uncompressed))
+
+        # remove compressed file
+        run("sudo rm {}".format(compressed))
+
+        # delete former symbolic link
+        run("sudo rm /data/web_static/current")
+
+        # create new symbolic link to uncompressed files,
+        run("sudo ln -s {} /data/web_static/current".format(uncompressed))
+
         return True
-    return False
+    except Exception:
+        return False

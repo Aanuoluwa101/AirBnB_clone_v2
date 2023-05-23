@@ -3,6 +3,7 @@
 
 app = Flask(__name__)
 
+
 @app.route('/')
 def say_hello():
     """Returns a hello message"""
